@@ -224,7 +224,7 @@ def create_comment(file_path, hunk: Hunk, reviews: Dict[str, List]) -> List[Dict
     comments = []
     for review in reviews.get('reviews', []):
         try:
-            line_number = int(review["lineNumber"])
+            line_number = int(review.lineNumber)
             print(f"AI suggested line: {line_number}")
 
             # Ensure the line number is within the hunk's range
@@ -233,7 +233,7 @@ def create_comment(file_path, hunk: Hunk, reviews: Dict[str, List]) -> List[Dict
                 continue
 
             comment = {
-                "body": review["reviewComment"],
+                "body": review.reviewComment,
                 "path": file_path,
                 "position": line_number
             }
