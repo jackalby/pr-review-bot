@@ -132,7 +132,7 @@ def get_openai_review(prompt: str):
     """
     # Initialize the Azure OpenAI client
     client = AzureOpenAI(
-        azure_endpoint=AZURE_OPENAI_ENDPOINT,
+        base_url=AZURE_OPENAI_ENDPOINT,
         api_key=AZURE_OPENAI_KEY,
         api_version=AZURE_OPENAI_API_VERSION
     )
