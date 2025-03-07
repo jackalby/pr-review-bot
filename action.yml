@@ -1,6 +1,6 @@
 name: 'PR Code Review Bot'
 description: 'Automatically reviews PRs using Azure OpenAI to provide feedback on code quality'
-author: 'Your Name'
+author: 'jackalby'
 
 inputs:
   github-token:
@@ -19,7 +19,7 @@ inputs:
   azure-openai-api-version:
     description: 'Azure OpenAI API version'
     required: false
-    default: '2024-02-01'
+    default: '2025-02-01-preview'
   exclude:
     description: 'Comma-separated list of file patterns to exclude from review'
     required: false
