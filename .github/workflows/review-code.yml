@@ -1,0 +1,20 @@
+name: PR Code Review
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/review') }}
+    steps:
+      - name: AI Code Review
+        uses: your-username/pr-review-bot@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          azure-openai-endpoint: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+          azure-openai-key: ${{ secrets.AZURE_OPENAI_KEY }}
+          azure-openai-deployment: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+          azure-openai-api-version: '2024-02-01'
+          exclude: '*.md,*.txt,*.json'
