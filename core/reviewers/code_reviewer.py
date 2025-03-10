@@ -283,23 +283,11 @@ class AICodeReviewer(BaseReviewer):
             # Critical issue (Priority 1) - Create a prominent red warning
             header = f"""<details open>
     <summary><h3>{emoji} {color_tag}</h3></summary>
-
-    > ### ⚠️ Impact: High Severity
-    > 
-    > This issue requires immediate attention and should be fixed before merging.
-
-    </details>
-
+    <h5>⚠️ Impact: High Severity</h5>
     """
         else:
             # Improvement suggestion (Priority 2) - Create a less alarming format
             header = f"""<details>
     <summary><h4>{emoji} {color_tag}</h4></summary>
-
-    > Consider addressing this to improve code quality.
-
-    </details>
-
     """
-
-        return f"{header}{review_comment}"
+        return f"{header}{review_comment.strip()}"
