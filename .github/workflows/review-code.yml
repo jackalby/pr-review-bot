@@ -10,7 +10,7 @@ jobs:
     if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/review') }}
     steps:
       - name: AI Code Review
-        uses: jackalby/pr-review-bot@main
+        uses: jackalby/pr-review-bot@v1.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           azure-openai-endpoint: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
