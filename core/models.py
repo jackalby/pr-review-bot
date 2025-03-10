@@ -26,7 +26,8 @@ class FileChange:
 class HunkReview(BaseModel):
     lineNumber: int = Field(..., description="The Line Number of the current code hunk")
     reviewComment: str = Field(..., description="The code review comment")
-    priority: int = Field(2, description="Priority level: 1=critical (bugs, security), 2=improvement (quality, performance)")
+    priority: int = Field(..., description="Priority level: 1=critical (bugs, security), 2=improvement (quality, performance)")
+    issueType: str = Field(..., description="Type of issue (bug, security, performance, style, documentation)")
 
 class FileReviews(BaseModel):
     reviews: List[HunkReview] = Field(..., description="All code reviews")
