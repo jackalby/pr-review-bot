@@ -180,8 +180,15 @@ class AICodeReviewer(BaseReviewer):
         comments = []
         for review in reviews.get('reviews', []):
             try:
-                line_number = int(review.get('lineNumber', 0))
-                review_comment = review.get('reviewComment', '')
+                # Handle both Pydantic model objects and dictionaries
+                if hasattr(review, 'lineNumber') and hasattr(review, 'reviewComment'):
+                    # It's a Pydantic model (from beta.chat.completions.parse)
+                    line_number = int(review.lineNumber)
+                    review_comment = review.reviewComment
+                else:
+                    # It's a dictionary (from regular chat.completions.create)
+                    line_number = int(review.get('lineNumber', 0))
+                    review_comment = review.get('reviewComment', '')
 
                 if not line_number or not review_comment:
                     continue
