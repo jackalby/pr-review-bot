@@ -84,12 +84,17 @@ class AICodeReviewer(BaseReviewer):
         - Focus on bugs, security issues, and performance problems.
         - IMPORTANT: NEVER suggest adding comments to the code
         
-    Your code review should contain two priorites:
-    Priority 1: Focus on bugs, security issues, integration problems
-    Priority 2: Code quality improvements and performance improvements
-    
-    Prepend all <review comment> with the priority tag: <b> "PRIORTY 1" | "PRIORITY 2" <\b> \n <review comment>
-
+        Your code review should contain two priorities:
+        Priority 1: Focus on bugs, security issues, integration problems (assign priority: 1)
+        Priority 2: Code quality improvements and performance improvements (assign priority: 2)
+        
+        For issue types, choose the most appropriate category:
+        - "bug": Logical errors, incorrect behavior, edge cases not handled
+        - "security": Security vulnerabilities, data exposure, authentication issues
+        - "performance": Inefficient code, memory leaks, slow algorithms
+        - "style": Code style, readability, naming conventions
+        - "documentation": Missing or unclear documentation
+        - "maintenance": Code structure, maintainability, duplication
     
     Review the following code diff in the file "{file_path}" and take the pull request title and description into account when writing the response.
         
@@ -181,19 +186,27 @@ class AICodeReviewer(BaseReviewer):
         for review in reviews.get('reviews', []):
             try:
                 # Handle both Pydantic model objects and dictionaries
+                # Handle both Pydantic model objects and dictionaries
                 if hasattr(review, 'lineNumber') and hasattr(review, 'reviewComment'):
                     # It's a Pydantic model (from beta.chat.completions.parse)
                     line_number = int(review.lineNumber)
                     review_comment = review.reviewComment
+                    priority = getattr(review, 'priority', 2)  # Default to priority 2 if not specified
+                    issue_type = getattr(review, 'issueType', "")  # Get issue type if available
                 else:
                     # It's a dictionary (from regular chat.completions.create)
                     line_number = int(review.get('lineNumber', 0))
                     review_comment = review.get('reviewComment', '')
+                    priority = review.get('priority', 2)  # Default to priority 2 if not specified
+                    issue_type = review.get('issueType', "")  # Get issue type if available
+
 
                 if not line_number or not review_comment:
                     continue
 
-                print(f"AI suggested line: {line_number}")
+                review_comment = self._format_comment(review_comment, priority, issue_type)
+
+                print(f"AI suggested line: {line_number}, Priority: {priority}")
 
                 # Ensure the line number is within the hunk's range
                 if line_number < 1 or line_number > hunk.source_length:
@@ -212,3 +225,81 @@ class AICodeReviewer(BaseReviewer):
                 print(f"Error creating comment from AI response: {e}, Response: {review}")
 
         return comments
+
+    def _format_comment(self, review_comment: str, priority: int, issue_type: str = "") -> str:
+        """
+        Format a review comment with enhanced visual priority indicators.
+
+        Args:
+            review_comment: The original review comment
+            priority: Priority level (1=critical, 2=improvement)
+            issue_type: Type of issue (bug, security, performance, etc.)
+
+        Returns:
+            Formatted comment with visual priority indicators
+        """
+        # Remove any existing priority tags
+
+        # Determine emoji and color tag based on issue type and priority
+        emoji_map = {
+            "bug": "🐛",
+            "security": "🔒",
+            "performance": "⚡",
+            "style": "🎨",
+            "documentation": "📝",
+            "maintenance": "🔧",
+            # Default emoji
+            "": "❗"
+        }
+
+        # Color tags based on priority
+        color_tags = {
+            1: {  # Priority 1 (Critical)
+                "bug": "🔴 CRITICAL BUG",
+                "security": "🔴 SECURITY VULNERABILITY",
+                "performance": "🔴 CRITICAL PERFORMANCE",
+                "style": "🔴 CRITICAL STYLE ISSUE",
+                "documentation": "🔴 CRITICAL DOCUMENTATION",
+                "maintenance": "🔴 CRITICAL MAINTENANCE",
+                "": "🔴 CRITICAL ISSUE"
+            },
+            2: {  # Priority 2 (Improvement)
+                "bug": "🟠 MINOR BUG",
+                "security": "🟠 SECURITY IMPROVEMENT",
+                "performance": "🟠 PERFORMANCE IMPROVEMENT",
+                "style": "🟠 STYLE SUGGESTION",
+                "documentation": "🟠 DOCUMENTATION SUGGESTION",
+                "maintenance": "🟠 MAINTENANCE IMPROVEMENT",
+                "": "🟠 IMPROVEMENT SUGGESTION"
+            }
+        }
+
+        issue_type_lower = issue_type.lower()
+        emoji = emoji_map.get(issue_type_lower, emoji_map[""])
+        color_tag = color_tags[priority].get(issue_type_lower, color_tags[priority][""])
+
+        # Create visually distinct section based on priority
+        if priority == 1:
+            # Critical issue (Priority 1) - Create a prominent red warning
+            header = f"""<details open>
+    <summary><h3>{emoji} {color_tag}</h3></summary>
+
+    > ### ⚠️ Impact: High Severity
+    > 
+    > This issue requires immediate attention and should be fixed before merging.
+
+    </details>
+
+    """
+        else:
+            # Improvement suggestion (Priority 2) - Create a less alarming format
+            header = f"""<details>
+    <summary><h4>{emoji} {color_tag}</h4></summary>
+
+    > Consider addressing this to improve code quality.
+
+    </details>
+
+    """
+
+        return f"{header}{review_comment}"
