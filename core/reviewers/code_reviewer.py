@@ -22,8 +22,11 @@ class AICodeReviewer(BaseReviewer):
             api_key=config.get("azure_openai_key"),
             api_version=config.get("azure_openai_api_version")
         )
+        print(config.get("azure_openai_endpoint"),
+            config.get("azure_openai_key"),
+            config.get("azure_openai_api_version"))
         self.deployment = config.get("azure_openai_deployment")
-
+        print(self.deployment)
     def review_file(self, file_path: str, hunks: List[Dict[str, Any]], pr_details: PRDetails) -> List[Dict[str, Any]]:
         """
         Review a file using AI and return comments.
